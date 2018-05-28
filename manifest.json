@@ -1,0 +1,52 @@
+{
+  "name": "Streamer Mode for Chrome",
+  "short_name": "Streamer Mode",
+  "version": "0.1",
+  "description": "Activate Streamer Mode to censor specific parts of websites in Chrome.",
+  "manifest_version": 2,
+  "permissions": [
+    "storage",
+    "declarativeContent",
+    "tabs",
+    "http://*/*",
+    "https://*/*",
+    "privacy",
+    "<all_urls>",
+    "webNavigation",
+    "webRequest",
+    "webRequestBlocking"
+  ],
+  "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_title": "Streamer Mode"
+  },
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": true
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "content_script.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "incognito": "split",
+  "optional_permissions": [
+    "file:///*"
+  ]
+}
