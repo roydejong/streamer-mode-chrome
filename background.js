@@ -2,12 +2,22 @@ class CensorSwitch {
     static init() {
         this._valueOn = false;
         this._valueClearHistory = false;
+        this._valueDisableAutofill = false;
 
-        chrome.storage.sync.get(["streamer_mode_on", "clear_history"], (result) => {
+        chrome.storage.sync.get(["streamer_mode_on", "clear_history", "disable_autofill"], (result) => {
             console.log(result);
 
-            this._valueOn = !!result.streamer_mode_on;
-            this._valueClearHistory = !!result.clear_history;
+            if (result.clear_history) {
+                this.turnClearHistoryOn();
+            }
+
+            if (result.disable_autofill) {
+                this.turnDisableAutofillOn();
+            }
+
+            if (result.streamer_mode_on) {
+                this.turnOn();
+            }
         });
     }
 
@@ -16,19 +26,37 @@ class CensorSwitch {
     }
 
     static turnOn() {
+        // Change value
         this._valueOn = true;
         chrome.storage.sync.set({"streamer_mode_on": true});
         console.log('StreamerMode is now enabled.');
 
+        // Clear history, if enabled
         if (this.getClearHistoryIsOn()) {
             CensorUtils.clearBrowsingHistory();
         }
+
+        // Change autofill, if enabled
+        if (this.getDisableAutofillIsOn()) {
+            CensorUtils.trySetAutofillSetting(false, false);
+        }
+
+        // Enable badge
+        chrome.browserAction.setBadgeText({ text: " ▶" });
+        chrome.browserAction.setBadgeBackgroundColor({ color: "#e74c3c" });
     }
 
     static turnOff() {
+        // Change value
         this._valueOn = false;
         chrome.storage.sync.set({"streamer_mode_on": false});
         console.log('StreamerMode is now disabled.');
+
+        // Release control of the autofill setting (always)
+        CensorUtils.trySetAutofillSetting(false, true);
+
+        // Disable badge
+        chrome.browserAction.setBadgeText({ text: "" });
     }
 
     static getClearHistoryIsOn() {
@@ -45,6 +73,25 @@ class CensorSwitch {
         this._valueClearHistory = false;
         chrome.storage.sync.set({"clear_history": false});
         console.log('Clear history is now disabled.');
+    }
+
+    static getDisableAutofillIsOn() {
+        return !!this._valueDisableAutofill;
+    }
+
+    static turnDisableAutofillOn() {
+        this._valueDisableAutofill = true;
+        chrome.storage.sync.set({"disable_autofill": true});
+        console.log('Disable autofill is now enabled.');
+    }
+
+    static turnDisableAutofillOff() {
+        this._valueDisableAutofill = false;
+        chrome.storage.sync.set({"disable_autofill": false});
+        console.log('Disable autofill is now disabled.');
+
+        // Release control of the autofill setting (always)
+        CensorUtils.trySetAutofillSetting(false, true);
     }
 }
 
@@ -95,9 +142,9 @@ class CensorServer {
                 break;
 
             case "ToggleClearHistory":
-                let turnOn = !CensorSwitch.getClearHistoryIsOn();
+                let turnOnCh = !CensorSwitch.getClearHistoryIsOn();
 
-                if (turnOn) {
+                if (turnOnCh) {
                     CensorSwitch.turnClearHistoryOn();
                 } else {
                     CensorSwitch.turnClearHistoryOff();
@@ -105,6 +152,19 @@ class CensorServer {
 
                 CensorPopup.syncPopup();
                 break;
+
+            case "ToggleDisableAutofill":
+                let turnOnDaf = !CensorSwitch.getDisableAutofillIsOn();
+
+                if (turnOnDaf) {
+                    CensorSwitch.turnDisableAutofillOn();
+                } else {
+                    CensorSwitch.turnDisableAutofillOff();
+                }
+
+                CensorPopup.syncPopup();
+                break;
+
             default:
                 console.warn("[StreamerMode:background] Cannot process extension message; unrecognized header:", msg);
                 break;
@@ -121,12 +181,38 @@ class CensorServer {
 
 class CensorUtils {
     static clearBrowsingHistory() {
-        let options =  {
-
-        };
+        let options = {};
 
         chrome.browsingData.removeHistory(options, () => {
             console.log('[StreamerMode]', 'Cleared browsing history.');
+        });
+    }
+
+    static trySetAutofillSetting(newValue, releaseControl) {
+        chrome.privacy.services.autofillEnabled.get({}, function (details) {
+            console.log(details);
+
+            if (details.levelOfControl === 'controllable_by_this_extension' || details.levelOfControl === 'controlled_by_this_extension') {
+                if (releaseControl) {
+                    chrome.privacy.services.autofillEnabled.clear({ }, function () {
+                        if (chrome.runtime.lastError === undefined) {
+                            console.log('[StreamerMode]', 'Autofill setting released.');
+                        } else {
+                            console.warn('[StreamerMode]', 'Could not release autofill setting:', chrome.runtime.lastError);
+                        }
+                    });
+                } else {
+                    chrome.privacy.services.autofillEnabled.set({value: !!newValue}, function () {
+                        if (chrome.runtime.lastError === undefined) {
+                            console.log('[StreamerMode]', 'Autofill changed to: ' + (newValue ? "on" : "off"));
+                        } else {
+                            console.warn('[StreamerMode]', 'Could not change autofill:', chrome.runtime.lastError);
+                        }
+                    });
+                }
+            } else {
+                console.warn('[StreamerMode]', 'Could not set autofill. (not controllable by this extension)');
+            }
         });
     }
 }
@@ -186,6 +272,7 @@ class CensorPopup {
 
         let censorIsOn = CensorSwitch.getIsOn();
         let clearHistoryIsOn = CensorSwitch.getClearHistoryIsOn();
+        let disableAutofillIsOn = CensorSwitch.getDisableAutofillIsOn();
 
         for (let i = 0; i < views.length; i++) {
             let doc = views[i].document;
@@ -206,6 +293,7 @@ class CensorPopup {
             fnToggleVis(doc, "LAMP-OFF", !censorIsOn);
 
             fnToggleDumTog(doc, "HISTORY", !!clearHistoryIsOn);
+            fnToggleDumTog(doc, "AUTOFILL", !!disableAutofillIsOn);
         }
     }
 }

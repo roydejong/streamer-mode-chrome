@@ -6,6 +6,7 @@ let btnToggleOff = document.getElementById('btn-toggle-off');
 let btnReloadHelper = document.getElementById('reload-helper');
 
 let toggleClearHistory = document.getElementById('btn-history');
+let toggleDisableAutofill = document.getElementById('btn-autofill');
 
 btnToggleOn.onclick = (e) => {
     bgPort.postMessage("SwitchOn");
@@ -26,6 +27,10 @@ btnReloadHelper.onclick = (e) => {
 
 toggleClearHistory.onclick = (e) => {
     bgPort.postMessage("ToggleClearHistory");
+};
+
+toggleDisableAutofill.onclick = (e) => {
+    bgPort.postMessage("ToggleDisableAutofill");
 };
 
 setInterval(() => {

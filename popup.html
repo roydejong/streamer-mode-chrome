@@ -108,6 +108,7 @@
         }
 
         .dum-tog {
+            transition: all .1s ease;
             background: #ccc;
             border-radius: 10px;
             height: 20px;
@@ -125,14 +126,17 @@
             bottom: 2px;
             left: 2px;
             right: auto;
+            margin-left: 0;
         }
 
         .dum-tog--on {
+            transition: all .1s ease;
             background: #6441A4;
         }
         .dum-tog--on .dum-tog-ball {
+            transition: all .1s ease;
             left: auto;
-            right: 2px;
+            margin-left: 14px;
         }
 
         .reload-helper {
@@ -152,6 +156,16 @@
         .reload-helper:hover {
             cursor: pointer;
             text-decoration: none;
+        }
+
+        .instl-title {
+            color: #999;
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(0, 0, 0, .05);
+            padding-top: 2rem;
         }
     </style>
 </head>
@@ -177,10 +191,20 @@
     <i class="mdi mdi-refresh"></i><span>Reload the page</span>
 </a>
 
-<a class="btn btn-dum" href="#" id="btn-history" title="Toggle: Clear all browser history when turning on streamer mode.">
+<div class="instl-title">When turning on streamer mode:</div>
+
+<a class="btn btn-dum" href="#" id="btn-history" title="Clears all browser history when turning on streamer mode.">
     <i class="mdi mdi-broom"></i>
     <span>Clear history</span>
     <div class="dum-tog dum-tog--on DUMTOG--HISTORY">
+        <div class="dum-tog-ball"></div>
+    </div>
+</a>
+
+<a class="btn btn-dum" href="#" id="btn-autofill" title="Attempts to disable Chrome's form filling settings when turning on streamer mode.">
+    <i class="mdi mdi-textbox"></i>
+    <span>Disable autofill</span>
+    <div class="dum-tog dum-tog--on DUMTOG--AUTOFILL">
         <div class="dum-tog-ball"></div>
     </div>
 </a>
