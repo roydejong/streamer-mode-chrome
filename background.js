@@ -42,7 +42,7 @@ class CensorSwitch {
         }
 
         // Enable badge
-        chrome.browserAction.setBadgeText({ text: " ▶" });
+        chrome.browserAction.setBadgeText({ text: "ON" });
         chrome.browserAction.setBadgeBackgroundColor({ color: "#e74c3c" });
     }
 

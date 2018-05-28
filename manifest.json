@@ -49,5 +49,9 @@
   "incognito": "split",
   "optional_permissions": [
     "file:///*"
-  ]
+  ],
+  "options_ui": {
+    "open_in_tab": false,
+    "page": "options.html"
+  }
 }

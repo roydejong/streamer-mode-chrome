@@ -1,0 +1,175 @@
+@import url('https://fonts.googleapis.com/css?family=Merriweather:400|Montserrat:400,600,700');
+
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+html {
+    font-size: 10px;
+}
+body {
+    font-size: 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400;
+    padding: 5px 15px;
+    min-width: 250px;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    text-align: left;
+    margin: 10px 0 15px 0;
+    line-height: normal;
+}
+.status-indicator > i {
+    margin-right: 7px;
+}
+.status-indicator > span {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.lamp {
+    display: flex;
+    background: #6441A4;
+    border-radius: 50%;
+    height: 14px;
+    width: 14px;
+    min-height: 14px;
+    min-width: 14px;
+    max-height: 14px;
+    max-width: 14px;
+    box-shadow: 0 0 0 5px rgba(0, 0, 0, .01);
+    opacity: 1.0;
+}
+.lamp--off {
+    background: #e74c3c;
+}
+.lamp--blink {
+    animation: blinker 1s cubic-bezier(.5, 0, 1, 1) infinite alternate;
+}
+
+@keyframes blinker {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.btn {
+    display: flex;
+    text-align: center;
+    color: #fff;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    padding: 15px;
+    font-weight: 600;
+    transition: all .1s ease;
+    text-decoration: none;
+    margin: 10px 0;
+    border-radius: 4px;
+    background: #6441A4;
+    cursor: pointer;
+}
+.btn:hover {
+    box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.1);
+}
+.btn:active {
+    box-shadow: inset 0 0 100px 100px rgba(0, 0, 0, 0.1);
+}
+.btn > i {
+    margin-right: 7px;
+}
+.btn-main--cancel {
+    background: #e74c3c;
+}
+
+.btn-dum {
+    text-align: left;
+    justify-content: flex-start;
+    background: transparent;
+    color: #666;
+    font-weight: normal;
+    font-size: 14px;
+    margin: 15px 0;
+    padding: 0;
+    cursor: pointer;
+}
+.btn-dum--danger {
+    color: #e74c3c;
+}
+.btn-dum:hover {
+    color: #5a7ea3;
+}
+.btn-dum > span {
+    flex-grow: 1;
+}
+
+.dum-tog {
+    transition: all .1s ease;
+    background: #ccc;
+    border-radius: 10px;
+    height: 20px;
+    width: 32px;
+    position: relative;
+}
+.dum-tog-ball {
+    transition: all .1s ease;
+    background: #fff;
+    border-radius: 50px;
+    height: 16px;
+    width: 16px;
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 2px;
+    right: auto;
+    margin-left: 0;
+}
+
+.dum-tog--on {
+    transition: all .1s ease;
+    background: #6441A4;
+}
+.dum-tog--on .dum-tog-ball {
+    transition: all .1s ease;
+    left: auto;
+    margin-left: 14px;
+}
+
+.reload-helper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #9b59b6;
+    text-decoration: underline;
+    font-size: 13px;
+    margin: 12px 0;
+    font-weight: 600;
+}
+.reload-helper > i {
+    margin-right: 5px;
+}
+.reload-helper:hover {
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.instl-title {
+    color: #999;
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-top: 20px;
+    border-top: 1px solid rgba(0, 0, 0, .05);
+    padding-top: 20px;
+}
+.instl-title--first {
+    padding-top: 0;
+    border-top: 0;
+    margin-top: 0;
+}

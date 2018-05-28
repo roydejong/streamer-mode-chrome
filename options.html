@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8" />
+    <title>Options popup</title>
+    <link href="shared.css" rel="stylesheet">
+    <link href="options.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="options-diag">
+    <div class="options-tab options-tab--manager" style="display: block;">
+        <div class="instl-title instl-title--first">Add / edit filters</div>
+        <table id="data-table" class="display cell-border">
+            <thead>
+                <tr>
+                    <th>Filter selector</th>
+                    <th>Site filter</th>
+                </tr>
+            </thead>
+        </table>
+        <a class="btn btn-big" id="props-new"><i class="mdi mdi-plus-circle"></i> Add a new filter</a>
+    </div>
+
+    <div class="options-tab options-tab--props" style="display: none;">
+        <div class="instl-title instl-title--first">Filter properties</div>
+
+        <div class="prop">
+            <label>CSS Selector:</label>
+            <textarea id="txt-prop-selectors" rows="2" placeholder="Enter CSS / jQuery selector for the filter"></textarea>
+        </div>
+
+        <div class="prop">
+            <label>Site filters:</label>
+            <textarea id="txt-prop-sites" rows="2" placeholder="Enter site / URL filters"></textarea>
+        </div>
+
+        <a class="btn btn-big" id="props-save"><i class="mdi mdi-check-circle"></i> Save filter</a>
+        <a class="btn btn-dum btn-dum--danger" id="props-del"><i class="mdi mdi-delete"></i> Delete this filter</a>
+        <a class="btn btn-dum" id="props-cancel"><i class="mdi mdi-arrow-left"></i> Cancel and go back</a>
+    </div>
+</div>
+
+<script src="external/jquery-3.3.1.min.js"></script>
+<script src="external/idb.js"></script>
+
+<link href="external/datatables.css" rel="stylesheet">
+<script src="external/datatables.js"></script>
+
+<script src="shared-db.js"></script>
+<script src="options.js"></script>
+
+<link href="https://cdn.materialdesignicons.com/2.4.85/css/materialdesignicons.min.css" rel="stylesheet">
+
+</body>
+</html>

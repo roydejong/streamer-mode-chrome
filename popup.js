@@ -8,6 +8,8 @@ let btnReloadHelper = document.getElementById('reload-helper');
 let toggleClearHistory = document.getElementById('btn-history');
 let toggleDisableAutofill = document.getElementById('btn-autofill');
 
+let optFilterManager = document.getElementById('btn-filters');
+
 btnToggleOn.onclick = (e) => {
     bgPort.postMessage("SwitchOn");
 };
@@ -31,6 +33,10 @@ toggleClearHistory.onclick = (e) => {
 
 toggleDisableAutofill.onclick = (e) => {
     bgPort.postMessage("ToggleDisableAutofill");
+};
+
+optFilterManager.onclick = () => {
+    chrome.runtime.openOptionsPage();
 };
 
 setInterval(() => {
