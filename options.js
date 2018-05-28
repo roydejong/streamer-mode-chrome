@@ -56,9 +56,6 @@ class CensorEdit {
 
         CensorEdit.syncPropEdit();
 
-        $('#props-del').show();
-        $('#props-del-real').hide();
-
         $('.options-tab--props').show();
         $('.options-tab--manager').hide();
     }
@@ -130,6 +127,8 @@ class CensorEdit {
     static syncPropEdit() {
         $('#txt-prop-selectors').val(this.data.selectors || "");
         $('#txt-prop-sites').val(this.data.sites || "");
+
+        $('#props-del-real').hide();
 
         if (CensorEdit.isEditMode) {
             $('#props-del').show();
