@@ -32,7 +32,14 @@ class CensorEdit {
 
         $('#props-del').click((e) => {
             e.preventDefault();
-            CensorEdit.endEdit();
+            $('#props-del').hide();
+            $('#props-del-real').show();
+            return false;
+        });
+
+        $('#props-del-real').click((e) => {
+            e.preventDefault();
+            CensorEdit.deleteEdit();
             return false;
         });
 
@@ -48,6 +55,9 @@ class CensorEdit {
         CensorEdit.isEditMode = !!data.key;
 
         CensorEdit.syncPropEdit();
+
+        $('#props-del').show();
+        $('#props-del-real').hide();
 
         $('.options-tab--props').show();
         $('.options-tab--manager').hide();
@@ -67,6 +77,23 @@ class CensorEdit {
             .then(() => {
                 CensorEdit.endEdit();
             });
+    }
+
+    static deleteEdit() {
+        if (this.data && this.data.key) {
+            CensorDb.deleteRule(this.data.key)
+                .then((key) => {
+                    console.log(`[Streamer Mode] Deleted db record`);
+                })
+                .catch((err) => {
+                    console.error(`[Streamer Mode] Error deleting record: ${err.toString()}`);
+                })
+                .then(() => {
+                    CensorEdit.endEdit();
+                });
+        } else {
+            this.endEdit();
+        }
     }
 
     static endEdit() {

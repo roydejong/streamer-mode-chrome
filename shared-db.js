@@ -33,6 +33,19 @@ class CensorDb {
         });
     }
 
+    static deleteRule(ruleKey) {
+        return new Promise((resolve, reject) => {
+            this.connection.then((db) => {
+                let tx = db.transaction('rules', 'readwrite');
+
+                tx.objectStore('rules').delete(ruleKey)
+                    .then(() => resolve())
+                    .catch(err => reject(err));
+            })
+                .catch(err => reject(err));
+        });
+    }
+
     static getAllRules() {
         return new Promise((resolve, reject) => {
             this.connection.then((db) => {
@@ -43,7 +56,7 @@ class CensorDb {
                     if (!cursor) return;
                     objs[cursor.primaryKey] = cursor.value;
                     cursor.continue();
-                })
+                });
 
                 tx.complete.then(() => {
                     console.log('getall', objs);
