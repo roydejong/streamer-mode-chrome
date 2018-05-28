@@ -5,6 +5,8 @@ let btnToggleOn = document.getElementById('btn-toggle-on');
 let btnToggleOff = document.getElementById('btn-toggle-off');
 let btnReloadHelper = document.getElementById('reload-helper');
 
+let toggleClearHistory = document.getElementById('btn-history');
+
 btnToggleOn.onclick = (e) => {
     bgPort.postMessage("SwitchOn");
 };
@@ -20,6 +22,10 @@ btnReloadHelper.onclick = (e) => {
     });
 
     btnReloadHelper.style.display = 'none';
+};
+
+toggleClearHistory.onclick = (e) => {
+    bgPort.postMessage("ToggleClearHistory");
 };
 
 setInterval(() => {

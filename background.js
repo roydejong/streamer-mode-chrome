@@ -1,28 +1,50 @@
 class CensorSwitch {
     static init() {
-        chrome.storage.sync.get("streamer_mode_on", (result) => {
-            this._value = (!!result);
+        this._valueOn = false;
+        this._valueClearHistory = false;
+
+        chrome.storage.sync.get(["streamer_mode_on", "clear_history"], (result) => {
+            console.log(result);
+
+            this._valueOn = !!result.streamer_mode_on;
+            this._valueClearHistory = !!result.clear_history;
         });
     }
 
     static getIsOn() {
-        return !!this._value;
-    }
-
-    static getIsOff() {
-        return !this._value;
+        return !!this._valueOn;
     }
 
     static turnOn() {
-        this._value = true;
+        this._valueOn = true;
         chrome.storage.sync.set({"streamer_mode_on": true});
         console.log('StreamerMode is now enabled.');
+
+        if (this.getClearHistoryIsOn()) {
+            CensorUtils.clearBrowsingHistory();
+        }
     }
 
     static turnOff() {
-        this._value = false;
+        this._valueOn = false;
         chrome.storage.sync.set({"streamer_mode_on": false});
         console.log('StreamerMode is now disabled.');
+    }
+
+    static getClearHistoryIsOn() {
+        return !!this._valueClearHistory;
+    }
+
+    static turnClearHistoryOn() {
+        this._valueClearHistory = true;
+        chrome.storage.sync.set({"clear_history": true});
+        console.log('Clear history is now enabled.');
+    }
+
+    static turnClearHistoryOff() {
+        this._valueClearHistory = false;
+        chrome.storage.sync.set({"clear_history": false});
+        console.log('Clear history is now disabled.');
     }
 }
 
@@ -72,6 +94,17 @@ class CensorServer {
                 CensorPopup.syncPopup();
                 break;
 
+            case "ToggleClearHistory":
+                let turnOn = !CensorSwitch.getClearHistoryIsOn();
+
+                if (turnOn) {
+                    CensorSwitch.turnClearHistoryOn();
+                } else {
+                    CensorSwitch.turnClearHistoryOff();
+                }
+
+                CensorPopup.syncPopup();
+                break;
             default:
                 console.warn("[StreamerMode:background] Cannot process extension message; unrecognized header:", msg);
                 break;
@@ -80,8 +113,21 @@ class CensorServer {
 
     static handleContentMessage(msg, sender, reply) {
         reply(JSON.stringify({
-            "enabled": !!CensorSwitch.getIsOn()
+            "enabled": !!CensorSwitch.getIsOn(),
+            "clear_history": !!CensorSwitch.getClearHistoryIsOn()
         }));
+    }
+}
+
+class CensorUtils {
+    static clearBrowsingHistory() {
+        let options =  {
+
+        };
+
+        chrome.browsingData.removeHistory(options, () => {
+            console.log('[StreamerMode]', 'Cleared browsing history.');
+        });
     }
 }
 
@@ -119,7 +165,27 @@ class CensorPopup {
             }
         };
 
+        let fnToggleDumTog = (doc, selectors, on) => {
+            selectors = (selectors.constructor === Array) ? selectors : [selectors.toString()];
+
+            for (let i = 0; i < selectors.length; i++) {
+                let selector = selectors[i];
+                let els = doc.getElementsByClassName(`DUMTOG--${selector}`);
+
+                for (let j = 0; j < els.length; j++) {
+                    let el = els[j];
+
+                    if (on) {
+                        el.classList.add('dum-tog--on');
+                    } else {
+                        el.classList.remove('dum-tog--on');
+                    }
+                }
+            }
+        };
+
         let censorIsOn = CensorSwitch.getIsOn();
+        let clearHistoryIsOn = CensorSwitch.getClearHistoryIsOn();
 
         for (let i = 0; i < views.length; i++) {
             let doc = views[i].document;
@@ -138,6 +204,8 @@ class CensorPopup {
 
             fnToggleVis(doc, "LAMP-ON", !!censorIsOn);
             fnToggleVis(doc, "LAMP-OFF", !censorIsOn);
+
+            fnToggleDumTog(doc, "HISTORY", !!clearHistoryIsOn);
         }
     }
 }

@@ -90,6 +90,51 @@
             background: #e74c3c;
         }
 
+        .btn-dum {
+            text-align: left;
+            justify-content: flex-start;
+            background: transparent;
+            color: #666;
+            font-weight: normal;
+            font-size: 1.4rem;
+            margin: 1.5rem 0;
+            padding: 0;
+        }
+        .btn-dum:hover {
+            color: #000;
+        }
+        .btn-dum > span {
+            flex-grow: 1;
+        }
+
+        .dum-tog {
+            background: #ccc;
+            border-radius: 10px;
+            height: 20px;
+            width: 32px;
+            position: relative;
+        }
+        .dum-tog-ball {
+            transition: all .1s ease;
+            background: #fff;
+            border-radius: 50px;
+            height: 16px;
+            width: 16px;
+            position: absolute;
+            top: 2px;
+            bottom: 2px;
+            left: 2px;
+            right: auto;
+        }
+
+        .dum-tog--on {
+            background: #6441A4;
+        }
+        .dum-tog--on .dum-tog-ball {
+            left: auto;
+            right: 2px;
+        }
+
         .reload-helper {
             display: flex;
             align-items: center;
@@ -118,18 +163,26 @@
     <span class="TXT--STATUS">...</span>
 </div>
 
-<a class="btn btn-main btn-main--cancel TOG--BTN-OFF" href="#" id="btn-toggle-off">
+<a class="btn btn-main btn-main--cancel TOG--BTN-OFF" href="#" id="btn-toggle-off" title="Turn streamer mode OFF">
     <i class="mdi mdi-security-off"></i>
     <span>Disable</span>
 </a>
 
-<a class="btn btn-main TOG--BTN-ON" href="#" id="btn-toggle-on">
+<a class="btn btn-main TOG--BTN-ON" href="#" id="btn-toggle-on" title="Turn streamer mode ON">
     <i class="mdi mdi-security"></i>
     <span>Enable</span>
 </a>
 
 <a class="reload-helper TOG--RELOAD" id="reload-helper" style="display: none;">
     <i class="mdi mdi-refresh"></i><span>Reload the page</span>
+</a>
+
+<a class="btn btn-dum" href="#" id="btn-history" title="Toggle: Clear all browser history when turning on streamer mode.">
+    <i class="mdi mdi-broom"></i>
+    <span>Clear history</span>
+    <div class="dum-tog dum-tog--on DUMTOG--HISTORY">
+        <div class="dum-tog-ball"></div>
+    </div>
 </a>
 
 <script src="popup.js"></script>
