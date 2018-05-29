@@ -92,49 +92,64 @@ class CensorRunner {
         this.gotInstructions = false;
     }
 
+    onDomReady() {
+        this.interval = 100;
+        this.resetIntervalTimer();
+    }
+
     start(nodePollInterval, setInstructions) {
         if (setInstructions && setInstructions.length) {
             this.setInstructions(setInstructions);
         }
 
-        this.interval = nodePollInterval || 100;
+        this.userInterval = nodePollInterval || 1000;
+        this.interval = 0;
 
+        this.resetIntervalTimer();
+    }
+
+    resetIntervalTimer() {
         if (this.intervalTimer) {
             clearInterval(this.intervalTimer);
             this.intervalTimer = null;
         }
 
         this.intervalTimer = setInterval(() => {
-            chrome.runtime.sendMessage({text: "sync"}, (response) => {
-                if (!response) {
-                    return;
+            this.intervalTick();
+        }, this.interval);
+    }
+
+    intervalTick() {
+        chrome.runtime.sendMessage({text: "sync"}, (response) => {
+            if (!response) {
+                return;
+            }
+
+            response = JSON.parse(response);
+
+            this.enabled = !!response.enabled;
+
+            let forceRun = false;
+
+            if (response.instructions_changed || !this.gotInstructions) {
+                let instructions = [];
+
+                for (let i = 0; i < response.instructions.length; i++) {
+                    let instrData = response.instructions[i];
+                    instructions.push(new CensorInstruction(instrData.selectors, instrData.sites));
                 }
 
-                response = JSON.parse(response);
-
-                this.enabled = !!response.enabled;
-
-                let forceRun = false;
-
-                if (response.instructions_changed || !this.instructions || !this.gotInstructions) {
-                    let instructions = [];
-
-                    for (let i = 0; i < response.instructions.length; i++) {
-                        let instrData = response.instructions[i];
-                        instructions.push(new CensorInstruction(instrData.selectors, instrData.sites));
-                    }
-
-                    console.log(`[Streamer Mode] Received new instruction list`, instructions);
-
+                if (instructions && instructions.length > 0) {
+                    console.log(`[Streamer Mode] Received new filter list with ${instructions.length} items`);
                     this.setInstructions(instructions);
                     forceRun = true;
                 }
+            }
 
-                if (this.enabled || forceRun) {
-                    this.run(forceRun);
-                }
-            });
-        }, nodePollInterval);
+            if (this.enabled || forceRun) {
+                this.run(forceRun);
+            }
+        });
     }
 
     /**
@@ -178,10 +193,12 @@ class CensorRunner {
         // ---
 
         if (!this.enabled) {
+            // Disabled (streamer mode is not enabled)
             return;
         }
 
-        if (!this.instructions) {
+        if (!this.instructions || !this.instructions.length) {
+            // Nothing to do
             return;
         }
 
@@ -203,7 +220,9 @@ class CensorRunner {
             total = CensorMan.executeInstruction(this.instructions[i]);
         }
 
-        console.log("Streamer mode censor: Affected " + total + " elements out of " + elementsInRun + " total");
+        if (total > 0) {
+            console.log("Streamer mode censor: Affected " + total + " elements out of " + elementsInRun + " total");
+        }
     }
 }
 
@@ -211,3 +230,7 @@ class CensorRunner {
 let runner = new CensorRunner();
 runner.start();
 
+// Notify runner on DOM ready event
+document.addEventListener('DOMContentLoaded', () => {
+    runner.onDomReady();
+}, false);
