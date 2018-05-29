@@ -29,6 +29,8 @@
   },
   "background": {
     "scripts": [
+      "external/idb.js",
+      "shared-db.js",
       "background.js"
     ],
     "persistent": true

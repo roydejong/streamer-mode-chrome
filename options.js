@@ -1,3 +1,5 @@
+let bgPort = chrome.runtime.connect();
+
 window.$dt = $('#data-table');
 
 class CensorEdit {
@@ -43,7 +45,7 @@ class CensorEdit {
             return false;
         });
 
-        CensorEdit.endEdit();
+        CensorEdit.endEdit(true);
     }
 
     static beginEdit(data) {
@@ -64,64 +66,82 @@ class CensorEdit {
         CensorEdit.data.selectors = $('#txt-prop-selectors').val();
         CensorEdit.data.sites = $('#txt-prop-sites').val();
 
+        if (!CensorEdit.data.selectors) {
+            // Selector field left blank
+            return;
+        }
+
+        if (!CensorEdit.data.sites) {
+            // Sites field left blank, default to wildcard
+            CensorEdit.data.sites = "*";
+        }
+
+        let anyChange = false;
+
         CensorDb.addOrUpdateRule(CensorEdit.data)
             .then((key) => {
                 console.log(`[Streamer Mode] Added or updated db record: ${(key || "???").toString()}`);
+                bgPort.postMessage("FiltersChanged");
+                anyChange = true;
             })
             .catch((err) => {
                 console.error(`[Streamer Mode] Error saving record: ${err.toString()}`);
             })
             .then(() => {
-                CensorEdit.endEdit();
+                CensorEdit.endEdit(anyChange);
             });
     }
 
     static deleteEdit() {
         if (this.data && this.data.key) {
+            let anyChange = false;
+
             CensorDb.deleteRule(this.data.key)
                 .then((key) => {
                     console.log(`[Streamer Mode] Deleted db record`);
+                    bgPort.postMessage("FiltersChanged");
+                    anyChange = true;
                 })
                 .catch((err) => {
                     console.error(`[Streamer Mode] Error deleting record: ${err.toString()}`);
                 })
                 .then(() => {
-                    CensorEdit.endEdit();
+                    CensorEdit.endEdit(anyChange);
                 });
         } else {
-            this.endEdit();
+            CensorEdit.endEdit();
         }
     }
 
-    static endEdit() {
+    static endEdit(doRefresh) {
         $('.options-tab--props').hide();
         $('.options-tab--manager').show();
 
-        CensorDb.getAllRules()
-            .then((objs) => {
-                dataTable.clear();
+        if (doRefresh) {
+            CensorDb.getAllRules()
+                .then((objs) => {
+                    dataTable.clear();
 
-                for (let key in objs) {
-                    if (objs.hasOwnProperty(key)) {
-                        let obj = objs[key];
-                        obj.key = parseInt(key);
+                    for (let key in objs) {
+                        if (objs.hasOwnProperty(key)) {
+                            let obj = objs[key];
+                            obj.key = parseInt(key);
 
-                        if (isNaN(obj.key)) {
-                            obj.key = undefined;
+                            if (isNaN(obj.key)) {
+                                obj.key = undefined;
+                            }
+
+                            dataTable.row.add(obj);
                         }
-
-                        console.log('list', key, obj);
-
-                        dataTable.row.add(obj);
                     }
-                }
 
-                dataTable.draw();
+                    dataTable.draw();
 
-            })
-            .catch((err) => {
-                console.error(`[Streamer Mode] Error saving record: ${err.toString()}`);
-            })
+                })
+                .catch((err) => {
+                    console.error(`[Streamer Mode] Error loading records: ${err.toString()}`);
+                })
+        }
     }
 
     static syncPropEdit() {

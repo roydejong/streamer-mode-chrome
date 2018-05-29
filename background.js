@@ -19,6 +19,37 @@ class CensorSwitch {
                 this.turnOn();
             }
         });
+
+        this.instructions = [];
+        this.instructionsChangedFlag = false;
+
+        this.reloadInstructions();
+    }
+
+    static reloadInstructions() {
+        CensorDb.getAllRules()
+            .then((objs) => {
+                let newList = [];
+
+                for (let key in objs) {
+                    if (objs.hasOwnProperty(key)) {
+                        let obj = objs[key];
+                        obj.key = parseInt(key);
+
+                        if (isNaN(obj.key)) {
+                            obj.key = undefined;
+                        }
+
+                        newList.push(obj);
+                    }
+                }
+
+                this.instructions = newList;
+                this.instructionsChangedFlag = true;
+            })
+            .catch((err) => {
+                console.error(`[Streamer Mode] Error loading records: ${err.toString()}`);
+            })
     }
 
     static getIsOn() {
@@ -117,6 +148,10 @@ class CensorServer {
         let msgHeader = msgParts[0];
 
         switch (msgHeader) {
+            case "FiltersChanged":
+                CensorSwitch.reloadInstructions();
+                break;
+
             case "SyncPopup":
                 CensorPopup.syncPopup();
                 break;
@@ -174,8 +209,12 @@ class CensorServer {
     static handleContentMessage(msg, sender, reply) {
         reply(JSON.stringify({
             "enabled": !!CensorSwitch.getIsOn(),
-            "clear_history": !!CensorSwitch.getClearHistoryIsOn()
+            "clear_history": !!CensorSwitch.getClearHistoryIsOn(),
+            "instructions": CensorSwitch.instructions,
+            "instructions_changed": CensorSwitch.instructionsChangedFlag
         }));
+
+        CensorSwitch.instructionsChangedFlag = false;
     }
 }
 

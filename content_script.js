@@ -83,6 +83,13 @@ class CensorRunner {
          * @type {boolean}
          */
         this.enabled = false;
+
+        /**
+         * Controls whether we have received any instructions.
+         *
+         * @type {boolean}
+         */
+        this.gotInstructions = false;
     }
 
     start(nodePollInterval, setInstructions) {
@@ -107,8 +114,24 @@ class CensorRunner {
 
                 this.enabled = !!response.enabled;
 
-                if (this.enabled) {
-                    this.run(false);
+                let forceRun = false;
+
+                if (response.instructions_changed || !this.instructions || !this.gotInstructions) {
+                    let instructions = [];
+
+                    for (let i = 0; i < response.instructions.length; i++) {
+                        let instrData = response.instructions[i];
+                        instructions.push(new CensorInstruction(instrData.selectors, instrData.sites));
+                    }
+
+                    console.log(`[Streamer Mode] Received new instruction list`, instructions);
+
+                    this.setInstructions(instructions);
+                    forceRun = true;
+                }
+
+                if (this.enabled || forceRun) {
+                    this.run(forceRun);
                 }
             });
         }, nodePollInterval);
@@ -136,6 +159,10 @@ class CensorRunner {
     setInstructions(instructions) {
         this.instructions = instructions;
         this.run(true);
+
+        if (instructions && instructions.length) {
+            this.gotInstructions = true;
+        }
     }
 
     /**
@@ -182,6 +209,5 @@ class CensorRunner {
 
 // Start
 let runner = new CensorRunner();
-runner.addInstruction(new CensorInstruction("p"));
 runner.start();
 
