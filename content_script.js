@@ -58,7 +58,7 @@ class CensorMan {
             htmlNode.textContent += "*";
         }
 
-        htmlNode.style.filter = "blur(5px)";
+        //htmlNode.style.filter = "blur(5px)";
         htmlNode.style.wordWrap = "word-break";
 
         return true;
