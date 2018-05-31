@@ -48,9 +48,7 @@ class CensorMan {
             return false;
         }
 
-        htmlNode.style.color = "#ccc";
-        htmlNode.style.background = "#ccc";
-
+        // Clear out the text component
         let prevText = htmlNode.textContent;
         htmlNode.textContent = "";
 
@@ -58,8 +56,12 @@ class CensorMan {
             htmlNode.textContent += "*";
         }
 
-        //htmlNode.style.filter = "blur(5px)";
-        htmlNode.style.wordWrap = "word-break";
+        // Ensure text & color have the same style, and no effects to reveal it
+        htmlNode.style.cssText = "color: #ccc !important;" +
+            "background: #ccc !important;" +
+            "text-shadow: none !important;" +
+            "word-wrap: break-word !important;"
+        ;
 
         return true;
     }
